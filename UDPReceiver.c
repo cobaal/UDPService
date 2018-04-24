@@ -65,8 +65,11 @@ int main(int argc, char *argv[]) {
 				perror("recvfrom fail");
 				exit(1);
 			}
-	
-			printf("%s] %s\n", inet_ntoa(client_addr.sin_addr), buf_rcv);
+
+			if (buf_rcv[0] != 0x2f)
+				printf("%s] %s\n", inet_ntoa(client_addr.sin_addr), buf_rcv);
+			else 
+				printf("%s] 0x%x 0x%x 0x%x\n", inet_ntoa(client_addr.sin_addr), buf_rcv[0], buf_rcv[1], buf_rcv[2]);
 		}
 
 	// Parent Process

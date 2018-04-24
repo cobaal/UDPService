@@ -38,54 +38,60 @@ int main(int argc, char *argv[]) {
 	int pid = -1;
 
 	while(1) {
-		// Get destination Addr
-		printf("%s:%s] ", argv[1], argv[2]);
+		// Get user input
+		if (pid == -1)
+			printf("%s:%s] ", argv[1], argv[2]);
+		else 
+			printf("To Exit the macro, input [exit] : ");
 		scanf("%s", buf_msg);
 
 		// Exit process
 		if (strcmp(buf_msg, "exit") == 0 && pid == -1) 
 			return 0;
-
-		else if (strcmp(buf_msg, "exit") == 0 && pid != -1) {
-			printf("Exit the macro first [qmacro]\n");
-			continue;
-		}
 		
 		// Exit macro
-		if (strcmp(buf_msg, "qmacro") == 0) {
-			if (pid != -1) { 
-				// Kill child process
-				if (!kill(pid, SIGINT)) {
-					pid = -1;
-					perror("Close Recv Process");
-				}
+		if (strcmp(buf_msg, "exit") == 0 && pid != -1) {
+			// Kill child process
+			if (!kill(pid, SIGINT)) {
+				pid = -1;
+				perror("Close Macro Process");
 			}
 			continue;
 		}
 		
 		// Active macro
-		if (strcmp(buf_msg, "macro") == 0) {
+		if ((strcmp(buf_msg, "smacro") == 0 || strcmp(buf_msg, "tmacro") == 0) && pid == -1) {
 			// Fork
 			if ((pid = fork()) < 0) 
 				perror("fork fail");
 				
 			// Child Process
 			if (pid == 0) {
+				char buf_macro[128];
+				int macro_size = sizeof(buf_macro);
+				buf_macro[0] = 0x2f;
+				buf_macro[1] = 0;
+				if (strcmp(buf_msg, "smacro") == 0) buf_macro[2] = 0x21;
+				if (strcmp(buf_msg, "tmacro") == 0) buf_macro[2] = 0x42;
+
 				while(1) {
-					if (sendto(serverSocket, buf_msg, BUFSIZE, 0, (struct sockaddr *)&d_addr, sizeof(d_addr)) < 0) {
+					if (sendto(serverSocket, buf_macro, macro_size, 0, (struct sockaddr *)&d_addr, sizeof(d_addr)) < 0) {
 						perror("send fail");
 						exit(1);
 					}
-					sleep(5);
+					buf_macro[1] = (buf_macro[1] + 1) % 128; //0~127
+					usleep(500 * 1000);
 				}
 			}
 			continue;
 		}
 
 		// normal msg
-		if (sendto(serverSocket, buf_msg, BUFSIZE, 0, (struct sockaddr *)&d_addr, sizeof(d_addr)) < 0) {
-			perror("send fail");
-			return 0;
+		if (pid == -1) {
+			if (sendto(serverSocket, buf_msg, BUFSIZE, 0, (struct sockaddr *)&d_addr, sizeof(d_addr)) < 0) {
+				perror("send fail");
+				return 0;
+			}
 		}
 	}
 
