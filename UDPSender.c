@@ -61,6 +61,11 @@ int main(int argc, char *argv[]) {
 		
 		// Active macro
 		if ((strcmp(buf_msg, "smacro") == 0 || strcmp(buf_msg, "tmacro") == 0) && pid == -1) {
+			// Get msec
+			int msec = 0;				
+			printf("Input msec : ");
+			scanf("%d", &msec);
+
 			// Fork
 			if ((pid = fork()) < 0) 
 				perror("fork fail");
@@ -73,14 +78,14 @@ int main(int argc, char *argv[]) {
 				buf_macro[1] = 0;
 				if (strcmp(buf_msg, "smacro") == 0) buf_macro[2] = 0x21;
 				if (strcmp(buf_msg, "tmacro") == 0) buf_macro[2] = 0x42;
-
+				
 				while(1) {
 					if (sendto(serverSocket, buf_macro, macro_size, 0, (struct sockaddr *)&d_addr, sizeof(d_addr)) < 0) {
 						perror("send fail");
 						exit(1);
 					}
 					buf_macro[1] = (buf_macro[1] + 1) % 128; //0~127
-					usleep(500 * 1000);
+					usleep(msec * 1000);
 				}
 			}
 			continue;

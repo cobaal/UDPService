@@ -58,6 +58,9 @@ int main(int argc, char *argv[]) {
 		int BUFSIZE = 512;
 		char buf_rcv[BUFSIZ];
 
+		double count_originPacket = 0.0;
+		double count_fakePacket = 0.0;
+
 		printf("RECEIVER : Waiting Request. [(Q)uit]\n");
 		while(1) {
 			nbyte = recvfrom(serverSocket, buf_rcv, BUFSIZE, 0, (struct sockaddr *)&client_addr, &client_addr_size);
@@ -66,10 +69,24 @@ int main(int argc, char *argv[]) {
 				exit(1);
 			}
 
-			if (buf_rcv[0] != 0x2f)
-				printf("%s] %s\n", inet_ntoa(client_addr.sin_addr), buf_rcv);
-			else 
+			if (buf_rcv[0] == 0x2f) { // Receive Origin Packet
 				printf("%s] 0x%x 0x%x 0x%x\n", inet_ntoa(client_addr.sin_addr), buf_rcv[0], buf_rcv[1], buf_rcv[2]);
+				count_originPacket++;
+
+			} else if (buf_rcv[0] == 0x46) { // Receive Fake Packet
+				printf("%s] 0x%x 0x%x 0x%x\n", inet_ntoa(client_addr.sin_addr), buf_rcv[0], buf_rcv[1], buf_rcv[2]);
+				count_fakePacket++;
+
+			} else if (buf_rcv[0] == 0x45) { // Receive Stop Pacekt
+				printf("############# Receive Stop Packet #############\n");
+				printf("Origin Packet : %lf\n", count_originPacket);
+				printf("Fake Packet : %lf\n", count_fakePacket);
+				printf("###############################################\n");
+				return 0;
+
+			} else { // Receive User Message
+				printf("%s] %s\n", inet_ntoa(client_addr.sin_addr), buf_rcv);
+			}
 		}
 
 	// Parent Process
