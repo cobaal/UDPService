@@ -1,6 +1,6 @@
 # UDPService
 
-installing
+Installing
 ----------
 
-git clone https://github.com/cobaal/UDPService
+	git clone https://github.com/cobaal/UDPService
