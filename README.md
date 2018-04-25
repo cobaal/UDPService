@@ -1,12 +1,12 @@
 # UDPService
 
+Copyright (c) 2018, Hyung-Seok Park
+
 ## Installing
----------
 
 	git clone https://github.com/cobaal/UDPService
 
 ## How to use
-----------
 
  - Compile
  
@@ -38,5 +38,4 @@
 
 		exit
 		
-----------
-Copyright (c) 2018, Hyung-Seok Park
+
