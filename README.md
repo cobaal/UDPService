@@ -27,7 +27,7 @@ Copyright (c) 2018, Hyung-Seok Park
 
  - Sender Execution (user Text)
 
-		root:~/UDPService$ ./tudp -u [<IP Address>] [<Port #>]
+		root:~/UDPService$ ./tudp -u [<IP Address>] [<Port>]
 
  - Periodically Send Messages
 
