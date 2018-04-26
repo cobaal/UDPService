@@ -1,12 +1,12 @@
 CC=gcc
 
-all: udpreceiver udpsender
+all: rudp tudp
 
-udpreceiver: UDPReceiver.c
+rudp: UDPReceiver.c
 	$(CC) -o $@ $^
 
-udpsender: UDPSender.c
+tudp: UDPSender.c
 	$(CC) -o $@ $^
 
 clean:
-	rm udpreceiver udpsender
+	rm rudp tudp

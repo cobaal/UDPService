@@ -11,12 +11,24 @@
 #include <sys/time.h>
 
 int main(int argc, char *argv[]) {
+	char *manMsg = "How to use : rudp [<option>] .. [<IP Address>] ... [<Port>]...\n\nThe options are described below.\n  -t,\tOutput the received packet in text format.\n  -h,\tOutput the received packet in hex format.\n\nHow to terminate : Q\n\n";
 
-	// ARGV
-	if (argc != 3) {
-		printf("PLEASE INPUT IP & PORT#\n");
+	int option = -1;
+
+	// Check Argc
+	if (argc != 4) {
+		printf("%s", manMsg);
 		return 0;
 	}
+
+	// Check Option
+	if (strcmp(argv[1], "-t") == 0) option = 1;
+	if (strcmp(argv[1], "-h") == 0) option = 2;
+
+	if (option == -1) {
+		printf("%s", manMsg);
+		return 0;
+	} 
 
 	// Make UDP Socket Discriptor
 	int serverSocket;
@@ -30,8 +42,8 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in server_addr;
 	memset(&server_addr, 0, sizeof(struct sockaddr));
 	server_addr.sin_family = AF_INET;			// IPv4 Internet Protocol
-	server_addr.sin_port = htons(atoi(argv[2]));		// Port #
-	server_addr.sin_addr.s_addr = inet_addr(argv[1]);	// IPv4 Address
+	server_addr.sin_port = htons(atoi(argv[3]));		// Port #
+	server_addr.sin_addr.s_addr = inet_addr(argv[2]);	// IPv4 Address
 
 	printf("RECEIVER : Binding...\n");
 	if (bind(serverSocket, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) < 0) {
@@ -81,26 +93,33 @@ int main(int argc, char *argv[]) {
 			gettimeofday(&val, NULL);
 			t = localtime(&val.tv_sec);
 
-			printf("[%02d:%02d:%02d.%06ld] ", t->tm_hour, t->tm_min, t->tm_sec, val.tv_usec);
+			printf("[%02d:%02d:%02d.%06ld] [%s] ", t->tm_hour, t->tm_min, t->tm_sec, val.tv_usec, inet_ntoa(client_addr.sin_addr));
 
-			// Output
-			if (buf_rcv[0] == 0x2f) { // Receive Origin Packet
-				printf("[%s] 0x%x 0x%x 0x%x\n", inet_ntoa(client_addr.sin_addr), buf_rcv[0], buf_rcv[1], buf_rcv[2]);
-				count_originPacket++;
+			// Output the received packet in text format.
+			if (option == 1) {
+				printf("%s\n", buf_rcv);
 
-			} else if (buf_rcv[0] == 0x46) { // Receive Fake Packet
-				printf("[%s] 0x%x 0x%x 0x%x\n", inet_ntoa(client_addr.sin_addr), buf_rcv[0], buf_rcv[1], buf_rcv[2]);
-				count_fakePacket++;
+			// Output the received packet in hex format.
+			} else if (option == 2) {
+				printf("0x%02X 0x%02X 0x%02X\n", buf_rcv[0], buf_rcv[1], buf_rcv[2]);
 
-			} else if (buf_rcv[0] == 0x45) { // Receive Stop Pacekt
-				printf("\n############# Receive Stop Packet #############\n");
-				printf("Origin Packet\t] %lf\n", count_originPacket);
-				printf("Fake Packet\t] %lf\n", count_fakePacket);
-				printf("###############################################\n");
-				return 0;
+				// Origin packet count
+				if (buf_rcv[0] == 0x2f) {
+					count_originPacket++;
 
-			} else { // Receive User Message
-				printf("[%s] %s\n", inet_ntoa(client_addr.sin_addr), buf_rcv);
+				// Fake packet count
+				} else if (buf_rcv[0] == 0x46) {
+					count_fakePacket++;
+
+				// Terminate
+				} else if(buf_rcv[0] == 0x45) {
+					printf("\n############# Receive Stop Packet #############\n");
+					printf("Origin Packet\t] %lf\n", count_originPacket);
+					printf("Fake Packet\t] %lf\n", count_fakePacket);
+					printf("Close Packet\t] 1.000000\n");
+					printf("###############################################\n");
+					return 0;
+				}
 			}
 		}
 
