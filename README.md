@@ -10,32 +10,31 @@ Copyright (c) 2018, Hyung-Seok Park
 
  - Compile
  
-		cd UDPService
-		make 
+		root:~$ cd UDPService
+		root:~/UDPService$ make 
 
- - Receiver Execution
+ - Receiver Execution (Text)
  
-		 ./udpreceiver [IP Address] [Port #]
+		root:~/UDPService$ ./rudp -t [<IP Address>] [<Port>] 
+
+ - Receiver Execution (Hex)
+ 
+		root:~/UDPService$ ./rudp -h [<IP Address>] [<Port>] 
 
  - Receiver Termination
 
 		Q
 
- - Sender Execution
+ - Sender Execution (user Text)
 
-		./udpsender [Destination IP] [Destination Port #]
+		root:~/UDPService$ ./tudp -u [<IP Address>] [<Port #>]
 
  - Periodically Send Messages
 
-		[t/s]macro
-		msec : [msec]
-
- - Periodically Send Messages Termination
-
-		exit
+		root:~/UDPService$ ./tudp -i [<msec>] [<IP Address>] [<Port>]
 
  - Sender Termination
 
-		exit
+		xxx.xxx.xxx.xxx:xxxx] exit
 		
 
